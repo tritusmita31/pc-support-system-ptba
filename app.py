@@ -424,17 +424,17 @@ def register():
     st.markdown("## Buat Akun Baru")
     st.caption("Masukan data diri Anda untuk menggunakan sistem.")
 
-    nama = st.text_input("Name")
-    email = st.text_input("Email Address")
+    nama = st.text_input("Nama")
+    email = st.text_input("Email")
     
     password = st.text_input("Password", type="password")
-    confirm_password = st.text_input("Confirm Password", type="password")
+    confirm_password = st.text_input("Konfirmasi Password", type="password")
 
-    if st.button("Register Now"):
+    if st.button("Daftar Sekarang"):
         if password != confirm_password:
             st.error("Konfirmasi password tidak cocok!")
         elif not email.endswith("@gmail.com"):
-            st.error("Email must be a valid @gmail.com address")
+            st.error("Email harus beralamat @gmail.com")
         else:
             is_valid, error_msg = validate_password(password)
             if not is_valid:
@@ -446,22 +446,22 @@ def register():
                 else:
                     users.loc[len(users)] = [len(users)+1, nama, email, password, "user"]
                     save_users(users)
-                    st.success("Registration successful")
+                    st.success("Pendaftaran Berhasil!")
 
 def login():
     st.markdown("## Open Ticket PC Support")
     st.caption("Masuk dan pantau perbaikan perangkat Anda.")
 
-    nama = st.text_input("Name")
-    email = st.text_input("Email Address")
+    nama = st.text_input("Nama")
+    email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
     if st.button("Login ➡️"):
         if email == ADMIN_EMAIL_LOGIN:
             if nama != ADMIN_NAMA:
-                st.error("Invalid Name for this account!")
+                st.error("Nama tidak valid!")
             elif password != ADMIN_PASSWORD:
-                st.error("Incorrect Password!")
+                st.error("Password salah!")
             else:
                 st.session_state.login = True
                 st.session_state.user = nama
@@ -471,18 +471,18 @@ def login():
 
         users = load_users()
         if email not in users["email"].values:
-            st.error("Email not found!")
+            st.error("Email tidak ditemukan!")
         else:
             user_row = users[users["email"] == email].iloc[0]
             if user_row["nama"] != nama:
-                st.error("Invalid Name for this account!")
+                st.error("Nama tidak valid!")
             elif str(user_row["password"]) != password:
-                st.error("Incorrect Password!")
+                st.error("Password salah!")
             else:
                 st.session_state.login = True
                 st.session_state.user = nama
                 st.session_state.role = "USER"
-                st.session_state.menu_user = "Create Ticket" 
+                st.session_state.menu_user = "Buat Tiket" 
                 st.rerun()
 
 # =========================
@@ -556,7 +556,7 @@ def user_page():
             st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
-    elif st.session_state.menu_user == "Create Ticket":
+    elif st.session_state.menu_user == "Buat Tiket":
         st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
         st.markdown("### Form Perbaikan")
         perangkat = st.selectbox("Perangkat", ["Laptop", "PC", "Printer", "Network / Jaringan", "Lainnya"])
@@ -658,9 +658,9 @@ def admin_page():
 
     df_admin = load_tiket()
 
-    if st.session_state.menu_admin == "Management Dashboard":
+    if st.session_state.menu_admin == "Manajemen Dashboard":
         # Metric Master Overview For Admin
-        st.markdown("### Management Dashboard")
+        st.markdown("### Manajemen Dashboard")
         col1, col2, col3 = st.columns(3)
         
         pending_count = len(df_admin[df_admin.status == "Pending"])
@@ -671,8 +671,8 @@ def admin_page():
         col2.markdown(f'<div class="user-metric-card bg-blue-card"><div class="user-metric-title">In Progress</div><div class="user-metric-val">{proses_count}</div></div>', unsafe_allow_html=True)
         col3.markdown(f'<div class="user-metric-card bg-green-card"><div class="user-metric-title">Resolved</div><div class="user-metric-val">{selesai_count}</div></div>', unsafe_allow_html=True)
 
-    elif st.session_state.menu_admin == "Manage Tickets":
-        st.markdown("### Ticket Management - Semua Tiket")
+    elif st.session_state.menu_admin == "Manajemen Tiket":
+        st.markdown("### Manajemen Tiket - Semua Tiket")
         
         if df_admin.empty:
             st.info("Data tiket saat ini masih kosong (empty).")
@@ -790,12 +790,12 @@ def admin_page():
 # =========================
 # CORE NAVIGATION LOGIC
 # =========================
-@st.dialog("Logout Confirmation")
+@st.dialog("Konfirmasi Logout")
 def logout_dialog():
-    st.write("Are you sure you want to log out?")
+    st.write("Apakah Anda yakin ingin keluar?")
     c1, c2 = st.columns([1, 1])
     with c1:
-        if st.button("Yes", type="primary", use_container_width=True):
+        if st.button("Ya", type="primary", use_container_width=True):
             st.session_state.login = False
             st.session_state.selected_location = ""
             st.session_state.user = ""
@@ -806,7 +806,7 @@ def logout_dialog():
                 del st.session_state.menu_admin
             st.rerun()
     with c2:
-        if st.button("No", use_container_width=True):
+        if st.button("Tidak", use_container_width=True):
             st.rerun()
 
 def main():
@@ -843,8 +843,8 @@ def main():
         """, unsafe_allow_html=True)
         
         # Sidebar completely stripped down for Pre-login
-        st.sidebar.markdown("## Account Access")
-        menu = st.sidebar.radio("Authentication", ["Login", "Register"])
+        st.sidebar.markdown("## Akses Akun")
+        menu = st.sidebar.radio("Autentikasi", ["Login", "Daftar"])
         if menu == "Login":
             login()
         else:
@@ -862,9 +862,9 @@ def main():
         # STRICT ROLE PARSING LOGIC
         if st.session_state.role == "ADMIN":
             if "menu_admin" not in st.session_state:
-                st.session_state.menu_admin = "Management Dashboard"
+                st.session_state.menu_admin = "Manajemen Dashboard"
                 
-            st.session_state.menu_admin = st.sidebar.radio("Navigasi", ["Management Dashboard", "Manage Tickets"], label_visibility="collapsed")
+            st.session_state.menu_admin = st.sidebar.radio("Navigasi", ["Manajemen Dashboard", "Manajemen Tiket"], label_visibility="collapsed")
             admin_page()
         elif st.session_state.role == "USER":
             if "menu_user" not in st.session_state:

@@ -387,7 +387,7 @@ Terima kasih,
 Tim PC Support
 """
     msg = MIMEText(body)
-    msg["Subject"] = f"[NOTIFICATION PC SUPPORT] Ticket {ticketing_id} Status Update: Resolved"
+    msg["Subject"] = f"[NOTIFICATION PC SUPPORT] Tiket {ticketing_id} Status Update: Resolved"
     msg["From"] = ADMIN_EMAIL
     msg["To"] = user_email
 
@@ -492,7 +492,7 @@ def user_page():
     tiket = load_tiket()
     df_user = tiket[tiket["user"] == st.session_state.user]
     
-    if st.session_state.menu_user == "Dashboard Ticket":
+    if st.session_state.menu_user == "Dashboard Tiket":
         st.markdown(f"<h2>👋 Halo, {st.session_state.user}</h2>", unsafe_allow_html=True)
         st.markdown('<div class="info-box glass-panel" style="margin-bottom:20px; padding: 15px 20px !important;">Pantau status perangkat Anda di sini</div>', unsafe_allow_html=True)
         
@@ -868,9 +868,9 @@ def main():
             admin_page()
         elif st.session_state.role == "USER":
             if "menu_user" not in st.session_state:
-                st.session_state.menu_user = "Dashboard Ticket"
+                st.session_state.menu_user = "Dashboard Tiket"
                 
-            st.session_state.menu_user = st.sidebar.radio("Navigasi", ["Dashboard Ticket", "Create Ticket"], label_visibility="collapsed")
+            st.session_state.menu_user = st.sidebar.radio("Navigasi", ["Dashboard Tiket", "Buat Tiket"], label_visibility="collapsed")
             user_page()
             
         # Move Logout to the bottom

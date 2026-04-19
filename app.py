@@ -15,7 +15,7 @@ AI_PC_SUPPORT_BG_URL = "https://cdn.pixabay.com/photo/2021/08/04/13/06/software-
 # =========================
 st.set_page_config(
     page_title="Open Ticket - PC Support",
-    page_icon="🔧",
+    page_icon="🖥️",
     layout="wide"
 )
 
@@ -457,23 +457,33 @@ def login():
     password = st.text_input("Password", type="password")
 
     if st.button("Login ➡️"):
-        if nama == ADMIN_NAMA and email == ADMIN_EMAIL_LOGIN and password == ADMIN_PASSWORD:
-            st.session_state.login = True
-            st.session_state.user = nama
-            st.session_state.role = "ADMIN"
-            st.rerun()
+        if email == ADMIN_EMAIL_LOGIN:
+            if nama != ADMIN_NAMA:
+                st.error("Invalid Name for this account!")
+            elif password != ADMIN_PASSWORD:
+                st.error("Incorrect Password!")
+            else:
+                st.session_state.login = True
+                st.session_state.user = nama
+                st.session_state.role = "ADMIN"
+                st.rerun()
+            return
 
         users = load_users()
-        user = users[(users.email == email) & (users.password == password) & (users.nama == nama)]
-
-        if not user.empty:
-            st.session_state.login = True
-            st.session_state.user = nama
-            st.session_state.role = "USER"
-            st.session_state.menu_user = "Create Ticket" 
-            st.rerun()
+        if email not in users["email"].values:
+            st.error("Email not found!")
         else:
-            st.error("Kredensial tidak valid.")
+            user_row = users[users["email"] == email].iloc[0]
+            if user_row["nama"] != nama:
+                st.error("Invalid Name for this account!")
+            elif str(user_row["password"]) != password:
+                st.error("Incorrect Password!")
+            else:
+                st.session_state.login = True
+                st.session_state.user = nama
+                st.session_state.role = "USER"
+                st.session_state.menu_user = "Create Ticket" 
+                st.rerun()
 
 # =========================
 # USER PAGE (STRICTLY FOR USERS)
@@ -504,19 +514,16 @@ def user_page():
             st.info("Anda belum memiliki riwayat tiket yang dikirimkan.")
         else:
             # Custom Table Display
-            col_widths = [1.5, 1.0, 1.0, 1.8, 1.5, 1.2, 1.0, 1.2]
+            col_widths = [1.5, 1.5, 1.2, 2.0, 1.8, 1.5, 1.2, 1.5]
             cols = st.columns(col_widths)
             fields = ["Ticketing ID", "User", "Device", "Issue", "PIC", "Date", "Status", "Updated"]
             for col, field in zip(cols, fields):
-                if field == "Ticketing ID":
-                    col.markdown(f"<p style='font-weight:bold; margin-bottom:0; white-space:nowrap;'>{field}</p>", unsafe_allow_html=True)
-                else:
-                    col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
+                col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
             st.markdown("---")
             
             for idx, row in df_user.iterrows():
                 c = st.columns(col_widths)
-                c[0].markdown(f"<div style='white-space: nowrap; font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
+                c[0].markdown(f"<div style='font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
                 c[1].write(row['user'])
                 c[2].write(row['perangkat'])
                 c[3].write(row['keluhan'])
@@ -671,19 +678,16 @@ def admin_page():
             st.info("Data tiket saat ini masih kosong (empty).")
         else:
             # List Header
-            cols_ratios = [1.5, 1.0, 1.0, 1.5, 1.2, 1.5, 1.0, 1.5, 3.5]
+            cols_ratios = [1.5, 1.2, 1.2, 1.8, 1.5, 1.5, 1.0, 1.5, 2.8]
             cols = st.columns(cols_ratios)
             fields = ["Ticketing ID", "User", "Device", "Issue", "PIC", "Date", "Status", "Updated", "Action"]
             for col, field in zip(cols, fields):
-                if field in ["Ticketing ID", "Status", "Action"]:
-                    col.markdown(f"<p style='font-weight:bold; margin-bottom:0; white-space:nowrap;'>{field}</p>", unsafe_allow_html=True)
-                else:
-                    col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
+                col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
             st.markdown("---")
 
             for idx, row in df_admin.sort_values("id_tiket", ascending=False).iterrows():
                 c = st.columns(cols_ratios)
-                c[0].markdown(f"<div style='white-space: nowrap; font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
+                c[0].markdown(f"<div style='font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
                 c[1].write(row['user'])
                 c[2].write(row['perangkat'])
                 c[3].write(row['keluhan'])
@@ -700,11 +704,11 @@ def admin_page():
                 c[5].markdown(f"{date_only}<br><span style='color:gray;'>{time_only}</span>", unsafe_allow_html=True)
                 
                 if s == "Pending":
-                    badge = f"<span style='background:#FFE0B2; color:#E65100; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px; white-space:nowrap;'>{s}</span>"
+                    badge = f"<span style='background:#FFE0B2; color:#E65100; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
                 elif s == "In Progress":
-                    badge = f"<span style='background:#BBDEFB; color:#1565C0; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px; white-space:nowrap;'>{s}</span>"
+                    badge = f"<span style='background:#BBDEFB; color:#1565C0; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
                 else:
-                    badge = f"<span style='background:#C8E6C9; color:#2E7D32; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px; white-space:nowrap;'>{s}</span>"
+                    badge = f"<span style='background:#C8E6C9; color:#2E7D32; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
                 c[6].markdown(badge, unsafe_allow_html=True)
                 
                 full_updated = str(row['updated_at'])
@@ -786,6 +790,25 @@ def admin_page():
 # =========================
 # CORE NAVIGATION LOGIC
 # =========================
+@st.dialog("Logout Confirmation")
+def logout_dialog():
+    st.write("Are you sure you want to log out?")
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        if st.button("Yes", type="primary", use_container_width=True):
+            st.session_state.login = False
+            st.session_state.selected_location = ""
+            st.session_state.user = ""
+            st.session_state.role = ""
+            if "menu_user" in st.session_state:
+                del st.session_state.menu_user
+            if "menu_admin" in st.session_state:
+                del st.session_state.menu_admin
+            st.rerun()
+    with c2:
+        if st.button("No", use_container_width=True):
+            st.rerun()
+
 def main():
     if not st.session_state.login:
         # Sidebar completely stripped down for Pre-login
@@ -822,15 +845,7 @@ def main():
         # Move Logout to the bottom
         st.sidebar.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
         if st.sidebar.button("Logout", key="logout_btn", use_container_width=True):
-            st.session_state.login = False
-            st.session_state.selected_location = ""
-            st.session_state.user = ""
-            st.session_state.role = ""
-            if "menu_user" in st.session_state:
-                del st.session_state.menu_user
-            if "menu_admin" in st.session_state:
-                del st.session_state.menu_admin
-            st.rerun()
+            logout_dialog()
 
 if __name__ == "__main__":
     main()

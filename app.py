@@ -811,6 +811,37 @@ def logout_dialog():
 
 def main():
     if not st.session_state.login:
+        # Dynamic CSS for Auth Pages: White Background, Dark Text
+        st.markdown("""
+        <style>
+            .stApp > header {
+                background-color: transparent !important;
+            }
+            .stApp .main .block-container {
+                background-color: #FFFFFF !important;
+            }
+            .stApp section.main {
+                background-color: #FFFFFF !important;
+            }
+            .stApp section.main * {
+                color: #001F3F !important;
+            }
+            /* Protect the button text color from global override */
+            .stApp section.main .stButton button p {
+                color: #FFFFFF !important;
+            }
+            /* Ensure input fields have light gray borders and dark text */
+            .stApp section.main div[data-baseweb="input"] > div {
+                background-color: #FFFFFF !important;
+                border: 1px solid #D0D0D0 !important;
+            }
+            .stApp section.main div[data-baseweb="input"] > div > input {
+                color: #001F3F !important;
+                -webkit-text-fill-color: #001F3F !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
         # Sidebar completely stripped down for Pre-login
         st.sidebar.markdown("## Account Access")
         menu = st.sidebar.radio("Authentication", ["Login", "Register"])

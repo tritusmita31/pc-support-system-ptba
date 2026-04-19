@@ -34,17 +34,6 @@ st.markdown("""
     div[data-testid="stSelectbox"] div div {
         font-size: 12px !important;
     }
-    @media (max-width: 640px) {
-        [data-testid="column"] {
-            width: auto !important;
-            flex: 1 1 0% !important;
-            min-width: 120px !important;
-        }
-        div[data-testid="stHorizontalBlock"] {
-            flex-direction: row !important;
-            overflow-x: auto !important;
-        }
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -525,47 +514,46 @@ def user_page():
             st.info("Anda belum memiliki riwayat tiket yang dikirimkan.")
         else:
             # Custom Table Display
-            with st.container():
-                col_widths = [1.5, 1.5, 1.2, 2.0, 1.8, 1.5, 1.2, 1.5]
-                cols = st.columns(col_widths, gap="small")
-                fields = ["Ticketing ID", "User", "Device", "Issue", "PIC", "Date", "Status", "Updated"]
-                for col, field in zip(cols, fields):
-                    col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
-                st.markdown("---")
+            col_widths = [1.5, 1.5, 1.2, 2.0, 1.8, 1.5, 1.2, 1.5]
+            cols = st.columns(col_widths)
+            fields = ["Ticketing ID", "User", "Device", "Issue", "PIC", "Date", "Status", "Updated"]
+            for col, field in zip(cols, fields):
+                col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
+            st.markdown("---")
+            
+            for idx, row in df_user.iterrows():
+                c = st.columns(col_widths)
+                c[0].markdown(f"<div style='font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
+                c[1].write(row['user'])
+                c[2].write(row['perangkat'])
+                c[3].write(row['keluhan'])
+                c[4].write(row['pic'])
                 
-                for idx, row in df_user.iterrows():
-                    c = st.columns(col_widths, gap="small")
-                    c[0].markdown(f"<div style='font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
-                    c[1].write(row['user'])
-                    c[2].write(row['perangkat'])
-                    c[3].write(row['keluhan'])
-                    c[4].write(row['pic'])
-                    
-                    full_date = str(row['tanggal'])
-                    date_only = full_date[:10]
-                    time_only = full_date[11:16] if len(full_date) >= 16 else "-"
-                    c[5].markdown(f"{date_only}<br><span style='color:gray;'>{time_only}</span>", unsafe_allow_html=True)
-                    
-                    s = row['status']
-                    if s == "Pending":
-                        badge = f"<span style='background:#FFE0B2; color:#E65100; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
-                    elif s == "In Progress":
-                        badge = f"<span style='background:#BBDEFB; color:#1565C0; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
-                    else:
-                        badge = f"<span style='background:#C8E6C9; color:#2E7D32; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
-                    c[6].markdown(badge, unsafe_allow_html=True)
-                    
-                    full_updated = str(row['updated_at'])
-                    if full_updated != "-":
-                        up_date = full_updated[:10]
-                        up_time = full_updated[11:16] if len(full_updated) >= 16 else ""
-                        c[7].markdown(f"{up_date}<br><span style='color:gray;'>{up_time}</span>", unsafe_allow_html=True)
-                    else:
-                        c[7].write("-")
-                    
-                    st.markdown("<hr style='margin: 5px 0; border-top: 1px solid #F0F0F0;'>", unsafe_allow_html=True)
+                full_date = str(row['tanggal'])
+                date_only = full_date[:10]
+                time_only = full_date[11:16] if len(full_date) >= 16 else "-"
+                c[5].markdown(f"{date_only}<br><span style='color:gray;'>{time_only}</span>", unsafe_allow_html=True)
                 
-                st.markdown("<br>", unsafe_allow_html=True)
+                s = row['status']
+                if s == "Pending":
+                    badge = f"<span style='background:#FFE0B2; color:#E65100; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
+                elif s == "In Progress":
+                    badge = f"<span style='background:#BBDEFB; color:#1565C0; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
+                else:
+                    badge = f"<span style='background:#C8E6C9; color:#2E7D32; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
+                c[6].markdown(badge, unsafe_allow_html=True)
+                
+                full_updated = str(row['updated_at'])
+                if full_updated != "-":
+                    up_date = full_updated[:10]
+                    up_time = full_updated[11:16] if len(full_updated) >= 16 else ""
+                    c[7].markdown(f"{up_date}<br><span style='color:gray;'>{up_time}</span>", unsafe_allow_html=True)
+                else:
+                    c[7].write("-")
+                
+                st.markdown("<hr style='margin: 5px 0; border-top: 1px solid #F0F0F0;'>", unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
     elif st.session_state.menu_user == "Create Ticket":
@@ -690,93 +678,92 @@ def admin_page():
             st.info("Data tiket saat ini masih kosong (empty).")
         else:
             # List Header
-            with st.container():
-                cols_ratios = [1.5, 1.2, 1.2, 1.8, 1.5, 1.5, 1.0, 1.5, 2.8]
-                cols = st.columns(cols_ratios, gap="small")
-                fields = ["Ticketing ID", "User", "Device", "Issue", "PIC", "Date", "Status", "Updated", "Action"]
-                for col, field in zip(cols, fields):
-                    col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
-                st.markdown("---")
-    
-                for idx, row in df_admin.sort_values("id_tiket", ascending=False).iterrows():
-                    c = st.columns(cols_ratios, gap="small")
-                    c[0].markdown(f"<div style='font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
-                    c[1].write(row['user'])
-                    c[2].write(row['perangkat'])
-                    c[3].write(row['keluhan'])
-                    
-                    s = row['status']
-                    if s != "Resolved":
-                        new_pic = c[4].text_input("PIC", value=row['pic'], key=f"pic_{row['id_tiket']}", label_visibility="collapsed")
-                    else:
-                        c[4].write(row['pic'])
-                    
-                    full_date = str(row['tanggal'])
-                    date_only = full_date[:10]
-                    time_only = full_date[11:16] if len(full_date) >= 16 else "-"
-                    c[5].markdown(f"{date_only}<br><span style='color:gray;'>{time_only}</span>", unsafe_allow_html=True)
-                    
-                    if s == "Pending":
-                        badge = f"<span style='background:#FFE0B2; color:#E65100; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
-                    elif s == "In Progress":
-                        badge = f"<span style='background:#BBDEFB; color:#1565C0; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
-                    else:
-                        badge = f"<span style='background:#C8E6C9; color:#2E7D32; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
-                    c[6].markdown(badge, unsafe_allow_html=True)
-                    
-                    full_updated = str(row['updated_at'])
-                    if full_updated != "-":
-                        up_date = full_updated[:10]
-                        up_time = full_updated[11:16] if len(full_updated) >= 16 else ""
-                        c[7].markdown(f"{up_date}<br><span style='color:gray;'>{up_time}</span>", unsafe_allow_html=True)
-                    else:
-                        c[7].write("-")
-                    
-                    with c[8]:
-                        if s != "Resolved":
-                            sub1, sub2 = st.columns([1.8, 1.2])
-                            with sub1:
-                                new_status = st.selectbox(
-                                    "Status Update", 
-                                    ["Pending", "In Progress", "Resolved"], 
-                                    index=["Pending", "In Progress", "Resolved"].index(row['status']),
-                                    key=f"status_{row['id_tiket']}"
-                                )
-                            with sub2:
-                                st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
-                                if st.button("Update", key=f"btn_{row['id_tiket']}", use_container_width=True):
-                                    if new_status != s or new_pic != row['pic']:
-                                        df_admin.loc[df_admin["id_tiket"] == row['id_tiket'], "status"] = new_status
-                                        df_admin.loc[df_admin["id_tiket"] == row['id_tiket'], "pic"] = new_pic
-                                        if new_status == "Resolved" and s != "Resolved":
-                                            df_admin.loc[df_admin["id_tiket"] == row['id_tiket'], "updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-                                        save_tiket(df_admin)
-                                        
-                                        # Trigger email ONLY when changed to Resolved
-                                        if new_status == "Resolved":
-                                            users = load_users()
-                                            user_data = users[users["nama"] == row["user"]]
-                                            if not user_data.empty:
-                                                user_email = user_data.iloc[0]["email"]
-                                                waktu_selesai = datetime.now().strftime("%Y-%m-%d %H:%M")
-                                                email_sent = send_email_notification(user_email, row["user"], row["perangkat"], row["id_tiket"], waktu_selesai)
-                                                if not email_sent:
-                                                    st.warning("Successfully")
-                                                    time.sleep(2)
-                                                else:
-                                                    st.success("Successfully ")
-                                                    time.sleep(1)
-                                        else:
-                                            st.success("Status Updated!")
-                                            time.sleep(0.5)
-                                            
-                                        st.rerun()
-                        else:
-                            st.markdown("<span style='color:green; font-size:13px; font-weight:bold; white-space:nowrap;'>Resolved</span>", unsafe_allow_html=True)
-                    
-                    st.markdown("---")
+            cols_ratios = [1.5, 1.2, 1.2, 1.8, 1.5, 1.5, 1.0, 1.5, 2.8]
+            cols = st.columns(cols_ratios)
+            fields = ["Ticketing ID", "User", "Device", "Issue", "PIC", "Date", "Status", "Updated", "Action"]
+            for col, field in zip(cols, fields):
+                col.markdown(f"<p style='font-weight:bold; margin-bottom:0;'>{field}</p>", unsafe_allow_html=True)
+            st.markdown("---")
+
+            for idx, row in df_admin.sort_values("id_tiket", ascending=False).iterrows():
+                c = st.columns(cols_ratios)
+                c[0].markdown(f"<div style='font-family: monospace; font-size: 14px;'>{row['id_tiket']}</div>", unsafe_allow_html=True)
+                c[1].write(row['user'])
+                c[2].write(row['perangkat'])
+                c[3].write(row['keluhan'])
                 
-                st.markdown("<br>", unsafe_allow_html=True)
+                s = row['status']
+                if s != "Resolved":
+                    new_pic = c[4].text_input("PIC", value=row['pic'], key=f"pic_{row['id_tiket']}", label_visibility="collapsed")
+                else:
+                    c[4].write(row['pic'])
+                
+                full_date = str(row['tanggal'])
+                date_only = full_date[:10]
+                time_only = full_date[11:16] if len(full_date) >= 16 else "-"
+                c[5].markdown(f"{date_only}<br><span style='color:gray;'>{time_only}</span>", unsafe_allow_html=True)
+                
+                if s == "Pending":
+                    badge = f"<span style='background:#FFE0B2; color:#E65100; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
+                elif s == "In Progress":
+                    badge = f"<span style='background:#BBDEFB; color:#1565C0; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
+                else:
+                    badge = f"<span style='background:#C8E6C9; color:#2E7D32; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px;'>{s}</span>"
+                c[6].markdown(badge, unsafe_allow_html=True)
+                
+                full_updated = str(row['updated_at'])
+                if full_updated != "-":
+                    up_date = full_updated[:10]
+                    up_time = full_updated[11:16] if len(full_updated) >= 16 else ""
+                    c[7].markdown(f"{up_date}<br><span style='color:gray;'>{up_time}</span>", unsafe_allow_html=True)
+                else:
+                    c[7].write("-")
+                
+                with c[8]:
+                    if s != "Resolved":
+                        sub1, sub2 = st.columns([1.8, 1.2])
+                        with sub1:
+                            new_status = st.selectbox(
+                                "Status Update", 
+                                ["Pending", "In Progress", "Resolved"], 
+                                index=["Pending", "In Progress", "Resolved"].index(row['status']),
+                                key=f"status_{row['id_tiket']}"
+                            )
+                        with sub2:
+                            st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+                            if st.button("Update", key=f"btn_{row['id_tiket']}", use_container_width=True):
+                                if new_status != s or new_pic != row['pic']:
+                                    df_admin.loc[df_admin["id_tiket"] == row['id_tiket'], "status"] = new_status
+                                    df_admin.loc[df_admin["id_tiket"] == row['id_tiket'], "pic"] = new_pic
+                                    if new_status == "Resolved" and s != "Resolved":
+                                        df_admin.loc[df_admin["id_tiket"] == row['id_tiket'], "updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                                    save_tiket(df_admin)
+                                    
+                                    # Trigger email ONLY when changed to Resolved
+                                    if new_status == "Resolved":
+                                        users = load_users()
+                                        user_data = users[users["nama"] == row["user"]]
+                                        if not user_data.empty:
+                                            user_email = user_data.iloc[0]["email"]
+                                            waktu_selesai = datetime.now().strftime("%Y-%m-%d %H:%M")
+                                            email_sent = send_email_notification(user_email, row["user"], row["perangkat"], row["id_tiket"], waktu_selesai)
+                                            if not email_sent:
+                                                st.warning("Successfully")
+                                                time.sleep(2)
+                                            else:
+                                                st.success("Successfully ")
+                                                time.sleep(1)
+                                    else:
+                                        st.success("Status Updated!")
+                                        time.sleep(0.5)
+                                        
+                                    st.rerun()
+                    else:
+                        st.markdown("<span style='color:green; font-size:13px; font-weight:bold; white-space:nowrap;'>Resolved</span>", unsafe_allow_html=True)
+                
+                st.markdown("---")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
             
             # Export standardization
             df_export = df_admin.copy()
